@@ -213,6 +213,7 @@ jobs:
           #    so the actual key is supplied here — never committed to the repo.
           {
             echo "HERMES_CUSTOM_127_0_0_1_20128_API_KEY=${HERMES_API_KEY}"
+            echo "API_SERVER_KEY=${HERMES_API_KEY}"
             echo "TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}"
             echo "TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS}"
             echo "TELEGRAM_HOME_CHANNEL=${TELEGRAM_ALLOWED_USERS}"
@@ -220,6 +221,15 @@ jobs:
           } > ~/.hermes/.env
           chmod 600 ~/.hermes/.env
           echo '✅ Wrote ~/.hermes/.env from secrets'
+
+          # 3b. Enable the peer API server (api_server) from config.yaml.
+          #     No token in config.yaml — the key is read from env (API_SERVER_KEY)
+          #     at gateway startup. Verified: gateway expands ${VAR} only via
+          #     hermes_cli.config, NOT in the gateway platform layer.
+          hermes config set platforms.api_server.enabled true
+          hermes config set platforms.api_server.host 0.0.0.0
+          hermes config set platforms.api_server.port 8642
+          echo '✅ api_server (peer) enabled on 0.0.0.0:8642'
 
           # 4. Install MCP servers + the shadcn/improve skill.
           #    4a. Laravel Boost MCP (php artisan boost:mcp — provided by laravel/boost)
